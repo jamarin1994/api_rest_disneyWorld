@@ -1,0 +1,1074 @@
+openapi: 3.0.1
+info:
+  title: Api Disney World
+  description: >-
+    api para explorar el mundo de disney conociendo sus personajes y
+    peliculas,esta api esta hecha para el challenge de alkemy backend NodeJs
+  version: 1.0.0
+externalDocs:
+  description: ver repositorio
+  url: https://github.com/jamarin1994/api_rest_disneyWorld.git
+servers:
+  - url: http://localhost/
+tags:
+  - name: auth
+    description: >-
+      se encarga del registro de usuarios de la api y la emicion de
+      los token para el uso de la misma
+  - name: movies
+    description: >-
+      maneja todas las acciones relacionadas a las
+      peliculas dentro de la api
+  - name: characters
+    description: >-
+      maneja todas las acciones relacionadas a los personajes dentro de la api
+paths:
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: este enpoint se encarga del registro de nuevos usuarios
+      requestBody:
+        content:
+          aplication/json:
+            schema:
+              $ref: '#/components/schemas/authPost'
+        required: true
+      responses:
+        '200':
+          description: >-
+            registro exitoso se envio un email de bienvenida a la direccion de
+            email registrada
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/registerSuccess'
+        '400':
+          description: >-
+            hubo un error al procesar el registro por campos fsltantes o en
+            formato erroneo
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/registerError'
+        '500':
+          description: error interno en el servidor
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: este enpoint se encarga de autenticar a los usuarios y emitir los token
+      requestBody:
+        content:
+          aplication/json:
+            schema:
+              $ref: '#/components/schemas/authPost'
+        required: true
+      responses:
+        '200':
+          description: autenticacion exitosa
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/loginSuccess'
+        '401':
+          description: credenciales invalidas
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/loginError'
+  /movies:
+    get:
+      tags:
+        - movies
+      summary: este enpoint devuelve todas las peliculas
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/title'
+        - $ref: '#/components/parameters/gender'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: >-
+            peticion exitosa devuelve un objeto que contiene metadatos de la
+            respuesta y un array con todas las peliculas
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/listMovies'
+        '401':
+          description: token de auth invalido o expirado
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '500':
+          description: error interno en el servidor
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+    post:
+      tags:
+        - movies
+      summary: este enpoint crea una nueva pelicula
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/image'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bodyMoviesPost'
+        required: true
+      responses:
+        '201':
+          description: la pelicula se creo correctamente
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/movieAddSuccess'
+        '400':
+          description: la pelicula no se creo por que hay errores en los parametros
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/movieAddError'
+        '401':
+          description: token de auth invalido o expirado
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '500':
+          description: error interno en el servidor
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+  /movies/{movieId}:
+    get:
+      tags:
+        - movies
+      summary: este enpoint devuelve el detalle de una pelicula
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/movieId'
+      responses:
+        '200':
+          description: >-
+            peticion exitosa devuelve un objeto que contiene metadatos de la
+            respuesta y un objeto con la informacion de la pelicula
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/detailMovie'
+        '400':
+          description: el movieId contiene un string
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/incorectId'
+        '401':
+          description: token de auth invalido o expirado
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '404':
+          description: el movieId no coincide con niguna pelicula
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/movieDoestExist'
+        '500':
+          description: error interno en el servidor
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+    put:
+      tags:
+        - movies
+      summary: este enpoint actualiza los datos de una pelicula
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/movieId'
+        - $ref: '#/components/parameters/newImage'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bodyMoviesPost'
+        required: true
+      responses:
+        '200':
+          description: la pelicula se actualizo correctamente
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/movieUpdateSuccess'
+        '400':
+          description: la pelicula no se actualizo por que hay errores en los parametros
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/movieUpdateError'
+        '401':
+          description: token de auth invalido o expirado
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '404':
+          description: el movieId no coincide con niguna pelicula
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/movieDoestExist'
+        '500':
+          description: error interno en el servidor
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+    delete:
+      tags:
+        - movies
+      summary: este enpoint elimina una pelicula
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/movieId'
+      responses:
+        '200':
+          description: >-
+            peticion exitosa devuelve un objeto que contiene el status de la
+            peticion y la url de la pelicula borrada
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/deleteMovie'
+        '400':
+          description: el movieId contiene un string
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/incorectId'
+        '401':
+          description: token de auth invalido o expirado
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '404':
+          description: el movieId no coincide con niguna pelicula
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/movieDoestExist'
+        '500':
+          description: error interno en el servidor
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+  /characters:
+    get:
+      tags:
+        - characters
+      summary: este enpoint devuelve todos los personajes
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/name'
+        - $ref: '#/components/parameters/age'
+        - $ref: '#/components/parameters/weight'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: >-
+            peticion exitosa devuelve un objeto que contiene metadatos de la
+            respuesta y un array con todos los personajes
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/listcharacters'
+        '401':
+          description: token de auth invalido o expirado
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '500':
+          description: error interno en el servidor
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+    post:
+      tags:
+        - characters
+      summary: este enpoint crea un nuevo personaje
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/image'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bodycharactersPost'
+        required: true
+      responses:
+        '201':
+          description: el personaje se creo correctamente
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/characterAddSuccess'
+        '400':
+          description: el personaje no se creo por que hay errores en los parametros
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/characterAddError'
+        '401':
+          description: token de auth invalido o expirado
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '500':
+          description: error interno en el servidor
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+  /characters/{characterId}:
+    get:
+      tags:
+        - characters
+      summary: este enpoint devuelve el detalle de un personaje
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/characterId'
+      responses:
+        '200':
+          description: >-
+            peticion exitosa devuelve un objeto que contiene metadatos de la
+            respuesta y un objeto con la informacion del personaje
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/detailcharacter'
+        '400':
+          description: el charcterId contiene un string
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/incorectId'
+        '401':
+          description: token de auth invalido o expirado
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '404':
+          description: el charcterId no coincide con nigun personaje
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/characterDoestExist'
+        '500':
+          description: error interno en el servidor
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+    put:
+      tags:
+        - characters
+      summary: este enpoint actualiza los datos de un personaje
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/characterId'
+        - $ref: '#/components/parameters/newImage'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bodycharactersPost'
+        required: true
+      responses:
+        '200':
+          description: el personaje se actualizo correctamente
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/characterUpdateSuccess'
+        '400':
+          description: el personaje no se actualizo por que hay errores en los parametros
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/characterUpdateError'
+        '401':
+          description: token de auth invalido o expirado
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '404':
+          description: el characterId no coincide con nigun personaje
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/characterDoestExist'
+        '500':
+          description: error interno en el servidor
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+    delete:
+      tags:
+        - characters
+      summary: este enpoint elimina un personaje
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/characterId'
+      responses:
+        '200':
+          description: >-
+            peticion exitosa devuelve un objeto que contiene el status de la
+            peticion,un mensaje de exito y la url del personaje borrado
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/deletecharacter'
+        '400':
+          description: el characterId contiene un string
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/incorectId'
+        '401':
+          description: token de auth invalido o expirado
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '404':
+          description: el charaterId no coincide con nigun personaje
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/characterDoestExist'
+        '500':
+          description: error interno en el servidor
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+components:
+  parameters:
+    token:
+      name: token
+      in: header
+      example: >-
+        eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsIm5hbWUiOiJtYW51ZWx2YWxlbnp1ZWxhdHJAZ21haWwuY29tIiwiaWF0IjoxNjMyOTQwMTY1LCJleHAiOjE2MzI5NDAzNDV9.rD8KbYqEYhyAhNYvEMZhLBe8ZbCUQ8G6lg5Txj1CrWM
+      description: token JWT de autenticacion utiliza el schema Bearer
+      required: true
+    order:
+      name: order
+      in: query
+      example: DESC
+      description: >-
+        parametro opcional para ordenar peliculas o personajes por titulo o
+        nombre
+      required: false
+    image:
+      name: image
+      in: formData
+      example: The_Avengers.png
+      description: imagen de la pelicula o personaje a crear
+      required: true
+      type: file
+    newImage:
+      name: image
+      in: formData
+      example: The_Avengers2.png
+      description: >-
+        nueva imagen de la pelicula o personaje en caso de no actualiar la
+        imagen se conservara la imagen original
+      required: false
+      type: file
+    movieId:
+      name: movieId
+      in: path
+      example: 1
+      description: id de la pelicula a mostrar
+      required: true
+    title:
+      name: title
+      in: query
+      example: the avengers
+      description: parametro opcional para buscar peliculas por titulo
+      required: false
+    gender:
+      name: gender
+      in: query
+      example: '1'
+      description: >-
+        parametro opcional para filtrar peliculas por genero utiliza el id del
+        genero a filtrar
+      required: false
+    characterId:
+      name: characterId
+      in: path
+      example: 1
+      description: id del personaje a mostrar
+      required: true
+    name:
+      name: name
+      in: query
+      example: Robert Downey, Jr
+      description: parametro opcional para buscar personajes por nombre
+      required: false
+    age:
+      name: age
+      in: query
+      example: '56'
+      description: parametro opcional para filtrar perosnajes por edad
+      required: false
+    weight:
+      name: weight
+      in: query
+      example: '90'
+      description: parametro opcional para filtrar personajes por peso
+      required: false
+  schemas:
+    incorectId:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        msg:
+          type: string
+          example: la identificación debe ser numérica
+    serverError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 500
+        msg:
+          type: string
+          example: Error Interno del Servidor
+    Unauthorized:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 401
+        msg:
+          type: string
+          example: Token inválido o caducado
+    authPost:
+      type: object
+      properties:
+        email:
+          type: string
+          example: josealbeiro@gmail.com
+          description: email del usuario
+        password:
+          type: string
+          example: '232123'
+          description: contraseña del usuario
+    registerSuccess:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+          description: codigo de exito
+        msg:
+          type: string
+          example: >-
+            registration successfully check your email to see the welcome
+            message
+          description: mensaje de exito y aviso de email de bienvenida
+    registerError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+          description: codigo de error
+        msg:
+          type: string
+          example: error al procesar el registro
+          description: mensaje de exito y aviso de email de bienvenida
+        errors:
+          type: object
+          example:
+            email:
+              value: ''
+              msg: required
+              param: email
+              location: body
+            password:
+              value: '7'
+              msg: format error
+              param: password
+              location: body
+          description: objeto que contiene un objeto por cada input con errores
+    loginSuccess:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+          description: codigo de exito
+        msg:
+          type: string
+          example: bienvenido josealbeiro@gmail.con
+          description: mensaje de bienvenida
+        expira en:
+          type: string
+          example: 3 min
+          description: tiempo de duracion del token
+        token:
+          type: string
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsIm5hbWUiOiJtYW51ZWx2YWxlbnp1ZWxhdHJAZ21haWwuY29tIiwiaWF0IjoxNjMyOTgwMjk2LCJleHAiOjE2MzI5ODA0NzZ9.FVn6XcfpSog8QAlVy5nrwU9vurNqGq7HwnAlRXQVNw0
+          description: token de autenticacion
+    loginError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 401
+          description: codigo de error
+        msg:
+          type: string
+          example: credenciales no válidas
+          description: mensaje de error
+    listMovies:
+      type: object
+      properties:
+        meta:
+          type: object
+          example:
+            status: 200
+            url: http://localhost:3000/movies/?title=&gender=&order=
+            moviesQuantity: 3
+          description: objeto con metadatos de la respuesta
+        movies:
+          type: array
+          items:
+            type: object
+          example:
+            - image: http://localhost:3000/movies/Cars.jpg
+              title: Cars
+              creationDate: '2006-06-09'
+              url: http://localhost:3000/movies/1
+            - image: http://localhost:3000/movies/Cruella.jpg
+              title: Cruella
+              creationDate: '2021-05-28'
+              url: http://localhost:3000/movies/2
+            - image: http://localhost:3000/movies/img-1632635562835.png
+              title: The Avengers
+              creationDate: '2012-04-14'
+              url: http://localhost:3000/movies/8
+          description: contiene un array de todas las peliculas de la api
+    bodyMoviesPost:
+      type: object
+      properties:
+        title:
+          type: string
+          example: The Avengers
+          description: titulo de la pelicula
+        creationDate:
+          type: string
+          example: '2012-04-14'
+          description: fecha de estreno de la pelicula
+        rating:
+          type: integer
+          example: 4
+          description: puntaje del 1 al 5 de la pelicula
+        genderId:
+          type: integer
+          example: 1
+          description: genero al que pertenece de la pelicula
+    movieAddSuccess:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 201
+        msg:
+          type: string
+          example: movie created successfully
+          description: mensaje de exito
+        url:
+          type: string
+          example: http://localhost/movies/1
+          description: url del detalle de la pelicula creada
+    movieAddError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        msg:
+          type: string
+          example: error when creating the movie
+          description: error en los inputs de formato o faltante
+        errors:
+          type: object
+          example:
+            image:
+              msg: required
+              param: image
+              location: body
+            genderId:
+              value: ''
+              msg: required
+              param: genderId
+              location: body
+            character:
+              value: '7'
+              msg: El personaje no existe
+              param: character
+              location: body
+          description: objeto que contiene un objeto por cada input con errores
+    detailMovie:
+      type: object
+      properties:
+        meta:
+          type: object
+          example:
+            status: 200
+            url: http://localhost:3000/movies/1
+            charactersQuantity: 5
+          description: objeto con metadatos de la respuesta
+        movie:
+          type: object
+          example:
+            id: 1
+            image: http://localhost:3000/movies/Cars.jpg
+            title: Cars
+            creationDate: '2006-06-09'
+            rating: 4
+            gender:
+              id: 1
+              name: animacion
+              image: http://localhost:3000/genders/animacion.jpg
+            characters:
+              - image: http://localhost:3000/characters/Rayo_McQueen.png
+                name: Rayo McQueen
+                url: http://localhost:3000/characters/2
+              - image: http://localhost:3000/characters/Mate.png
+                name: Mate
+                url: http://localhost:3000/characters/3
+              - image: http://localhost:3000/characters/SallyCarrera.png
+                name: Sally Carrera
+                url: http://localhost:3000/characters/4
+              - image: http://localhost:3000/characters/Doc_Hudson.png
+                name: Doc Hudson Hornet
+                url: http://localhost:3000/characters/5
+              - image: http://localhost:3000/characters/Sheriff_Cars.png
+                name: Sheriff
+                url: http://localhost:3000/characters/6
+          description: >-
+            objeto con informacion de la pelicula y los peronajes que participan
+            de ella
+    movieUpdateSuccess:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        msg:
+          type: string
+          example: movie updated successfully
+          description: mensaje de exito
+        url:
+          type: string
+          example: http://localhost/movies/1
+          description: url del detalle de la pelicula actualizada
+    movieUpdateError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        msg:
+          type: string
+          example: error when updated the movie
+          description: error en los inputs de formato o faltante
+        errors:
+          type: object
+          example:
+            image:
+              msg: required
+              param: image
+              location: body
+            genderId:
+              value: ''
+              msg: required
+              param: genderId
+              location: body
+            character:
+              value: '7'
+              msg: El personaje no existe
+              param: character
+              location: body
+          description: objeto que contiene un objeto por cada input con errores
+    movieDoestExist:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        msg:
+          type: string
+          example: la película no existe
+    deleteMovie:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        msg:
+          type: string
+          example: movie deleted successfully
+        url:
+          type: string
+          example: http://localhost/movies/1
+          description: url de la pelicula borrada
+    listcharacters:
+      type: object
+      properties:
+        meta:
+          type: object
+          example:
+            status: 200
+            url: http://localhost:3000/characters/?name=&age=&weight=&movie=&order=
+            charactersQuantity: 7
+          description: objeto con metadatos de la respuesta
+        characters:
+          type: array
+          items:
+            type: object
+          example:
+            - image: http://localhost:3000/characters/Doc_Hudson.png
+              name: Doc Hudson Hornet
+              url: http://localhost:3000/characters/5
+            - image: http://localhost:3000/characters/Emma_Stone.jpg
+              name: Emma Stone
+              url: http://localhost:3000/characters/1
+            - image: http://localhost:3000/characters/Mate.png
+              name: Mate
+              url: http://localhost:3000/characters/3
+            - image: http://localhost:3000/characters/Rayo_McQueen.png
+              name: Rayo McQueen
+              url: http://localhost:3000/characters/2
+            - image: http://localhost:3000/characters/img-1632781968163.png
+              name: Robert Downey, Jr
+              url: http://localhost:3000/characters/8
+            - image: http://localhost:3000/characters/SallyCarrera.png
+              name: Sally Carrera
+              url: http://localhost:3000/characters/4
+            - image: http://localhost:3000/characters/Sheriff_Cars.png
+              name: Sheriff
+              url: http://localhost:3000/characters/6
+          description: contiene un array de todas las peliculas de la api
+    bodycharactersPost:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Robert Downey, Jr
+          description: nombre del personaje
+        age:
+          type: integer
+          example: 56
+          description: edad del personaje
+        weight:
+          type: integer
+          example: 90
+          description: peso expresado en kg del personaje
+        history:
+          type: string
+          example: >-
+            Robert John Downey Jr. (Nueva York, 4 de abril de 1965) es un actor,
+            actor de voz, productor y cantante estadounidense. Inició su carrera
+            como actor a temprana edad apareciendo en varios filmes dirigidos
+            por su padre, Robert Downey Sr., y en su infancia estudió actuación
+            en varias academias de Nueva York. Se mudó con su padre a
+            California, pero abandonó sus estudios para enfocarse completamente
+            en su carrera.
+          description: descripcion del personaje
+    characterAddSuccess:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 201
+        msg:
+          type: string
+          example: personaje creado exitosamente
+          description: mensaje de exito
+        url:
+          type: string
+          example: http://localhost/characters/1
+          description: url del detalle del personaje creado
+    characterAddError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        msg:
+          type: string
+          example: error al crear el personaje
+          description: error en los inputs de formato o faltante
+        errors:
+          type: object
+          example:
+            image:
+              msg: required
+              param: image
+              location: body
+            name:
+              value: ''
+              msg: required
+              param: name
+              location: body
+            age:
+              value: ''
+              msg: required
+              param: age
+              location: body
+            weight:
+              value: ''
+              msg: required
+              param: weight
+              location: body
+            movie:
+              value: '7'
+              msg: la película no existe
+              param: movie
+              location: body
+          description: objeto que contiene un objeto por cada input con errores
+    detailcharacter:
+      type: object
+      properties:
+        meta:
+          type: object
+          example:
+            status: 200
+            url: http://localhost:3000/characters/1
+            moviesQuantity: 1
+          description: objeto con metadatos de la respuesta
+        character:
+          type: object
+          example:
+            id: 1
+            image: http://localhost:3000/characters/Emma_Stone.jpg
+            name: Emma Stone
+            age: 32
+            weight: 52
+            history: >-
+              Comenzó su carrera apareciendo en obras teatrales en el Valley
+              Youth Theatre de Phoenix como Las aventuras de Alicia en el país
+              de las maravillas y Joseph and the Amazing Technicolor
+              Dreamcoat,1​ y debutó en televisión en The New Partridge Family
+              (2005), sin embargo, solo se produjo un episodio piloto.5​ Su
+              primer papel en cine se dio en la comedia de Greg Mottola Superbad
+              (2007), junto a Michael Cera y Jonah Hill.6​ Obtuvo reconocimiento
+              por sus trabajos posteriores en producciones como easy A (2010) y
+              The Help (2011) en las cuales fue protagonista y que determinaron
+              excelentes críticas para la actriz.
+            movies:
+              - image: http://localhost:3000/movies/Cruella.jpg
+                title: Cruella
+                url: http://localhost:3000/movies/2
+          description: >-
+            objeto con informacion de la pelicula y los peronajes que participan
+            de ella
+    characterDoestExist:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        msg:
+          type: string
+          example: El personaje no existe
+    characterUpdateSuccess:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        msg:
+          type: string
+          example: charcter updated successfully
+          description: mensaje de exito
+        url:
+          type: string
+          example: http://localhost/charcter/1
+          description: url del detalle del personaje actualizado
+    characterUpdateError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        msg:
+          type: string
+          example: error al actualizar el personaje
+          description: error en los inputs de formato o faltante
+        errors:
+          type: object
+          example:
+            name:
+              value: ''
+              msg: required
+              param: name
+              location: body
+            age:
+              value: ''
+              msg: required
+              param: age
+              location: body
+            weight:
+              value: ''
+              msg: required
+              param: weight
+              location: body
+            movie:
+              value: '7'
+              msg: la película no existe
+              param: movie
+              location: body
+          description: objeto que contiene un objeto por cada input con errores
+    deletecharacter:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        msg:
+          type: string
+          example: character deleted successfully
+        url:
+          type: string
+          example: http://localhost/character/1
+          description: url del personaje borrado

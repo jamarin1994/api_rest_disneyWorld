@@ -1,0 +1,109 @@
+#!/usr/bin/env node
+
+/**
+  * Dependencias del módulo.
+  */
+
+var app = require('../app');
+var debug = require('debug')('challenge-node:server');
+var http = require('http');
+const {Sequelize} = require('sequelize');
+
+/**
+  * Obtenga el puerto del medio ambiente y guárdelo en Express.
+  */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+  * Crear servidor HTTP.
+  */
+
+var server = http.createServer(app);
+
+/**
+  * Escuche en el puerto proporcionado, en todas las interfaces de red.
+  */
+
+server.listen(port,() =>{ console.log(`=================================\nDisney world api listen on port ${port}\n \nURL : http://localhost:3000\n=================================`)});
+server.on('error', onError);
+server.on('listening', onListening);
+
+/*-------- probar conexión DB -------------*/
+
+const sequelize = new Sequelize('disneydb', process.env.DB_USER, process.env.DB_PASSWORD, {
+  host: process.env.HOST,
+  dialect: 'mysql'
+});
+
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log('=================================\n\nLa base de datos de conexión se ha establecido correctamente.\n\n=================================');
+  })
+  .catch(err => {
+    console.error('=================================\n\nNo se puede conectar a la base de datos, error :\n\n=================================\n', err);
+  })
+
+/*--------------------------*/
+
+/**
+  * Normalizar un puerto en un número, cadena o falso.
+  */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // canalización con nombre
+    return val;
+  }
+
+  if (port >= 0) {
+    // número de puerto
+    return port;
+  }
+
+  return false;
+}
+
+/**
+  * Oyente de eventos para el evento de "error" del servidor HTTP.
+  */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // maneja errores de escucha específicos con mensajes amigables
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+  * Oyente de eventos para el evento de "escucha" del servidor HTTP.
+  */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
